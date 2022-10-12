@@ -36,19 +36,23 @@ using std::cout;
 using std::cin;
 using std::endl;
 using std::string;
+using std::to_string;
 
 typedef void* HANDLE;
 
 namespace epos {
-    void LogError(string functionName, unsigned int errorCode);
-    void LogInfo(string info);
-
     class MotorController {
         public:
             MotorController();
             ~MotorController();
+            void connect(string deviceName, string protocolName, string interfaceName, string portName, unsigned int baudrate);
+            void move(unsigned int pos, unsigned int relAbs, unsigned int immWait);
 
         private:
+            void LogError(string functionName, unsigned int errorCode);
+            void LogInfo(string info);
+            HANDLE deviceHandle{0};
+            unsigned int errorCode{0};
 
     };
 };
