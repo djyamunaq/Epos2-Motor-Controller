@@ -1,6 +1,4 @@
 #include "MotorController.h"
-#include <string.h>
-#include <iostream>
 
 void epos::MotorController::LogError(string info, unsigned int errorCode) {
     char* errorInfo = new char[1000];
@@ -79,13 +77,13 @@ void epos::MotorController::connect(string deviceName, string protocolName, stri
     char* c_deviceName = new char[255];
     strcpy(c_deviceName, deviceName.c_str());
 
-    char* c_protocolName = new char[255];;
+    char* c_protocolName = new char[255];
     strcpy(c_protocolName, protocolName.c_str());
 
-    char* c_interfaceName = new char[255];;
+    char* c_interfaceName = new char[255];
     strcpy(c_interfaceName, interfaceName.c_str());
 
-    char* c_portName = new char[255];;
+    char* c_portName = new char[255];
     strcpy(c_portName, portName.c_str());
 
     LogInfo("Connecting...");
