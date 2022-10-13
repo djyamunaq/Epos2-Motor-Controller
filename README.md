@@ -1,6 +1,6 @@
 # Run CPP example
 $ cd cpp  
-$ mkdir build\n  
+$ mkdir build  
 $ cd build  
 $ cmake ..  
 $ make  
