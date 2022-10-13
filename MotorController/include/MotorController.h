@@ -58,6 +58,7 @@ namespace epos {
             ~MotorController();
             /* Connect to Epos2 Card */
             void connect(string deviceName, string protocolName, string interfaceName, string portName, unsigned int baudrate);
+            void checkMotorState(unsigned int nodeId);
             /* Move to relative/absolute position pos wait/immediately */
             void startMovement(unsigned int nodeId, unsigned int pos, unsigned int relAbs, unsigned int immWait);
             void stopMovement(unsigned int nodeId);
@@ -69,6 +70,7 @@ namespace epos {
             void LogInfo(string info);
             void LogDebug(string debugInfo);
             HANDLE deviceHandle{0};
+            unsigned int baudrate;
             unsigned int errorCode{0};
             map<unsigned int, MovementProfile> movementProfiles = map<unsigned int, MovementProfile>();
     };

@@ -33,7 +33,7 @@ int main(int argc, char** argv) {
         cin >> pos;
 
         // mc.move(pos, &movementProfile, ABSOLUTE, IMMEDIATE);
-        mc.startMovement(nodeId, pos, ABSOLUTE, IMMEDIATE);
+        mc.startMovement(nodeId, pos, RELATIVE, IMMEDIATE);
         // mc.printMovementProfile(nodeId);
     }
 

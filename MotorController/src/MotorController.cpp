@@ -2,14 +2,14 @@
 #include <string.h>
 #include <iostream>
 
-void epos::MotorController::LogError(string msg, unsigned int errorCode) {
+void epos::MotorController::LogError(string info, unsigned int errorCode) {
     char* errorInfo = new char[1000];
     if(errorCode == -1) {
-        cout << "\033[1;31m[" << std::hex << this->errorCode << std::dec << "] " << msg << "\033[0m\n";
+        cout << "\033[1;31m[" << std::hex << this->errorCode << std::dec << "] " << info << "\033[0m\n";
     } else if(VCS_GetErrorInfo(this->errorCode, errorInfo, 1000) == 0) {
         cout << BOLDRED << "Unknown Error" << RESET << endl;
     } else {
-        cout << "\033[1;31m[" << std::hex << this->errorCode << std::dec << "] " << msg << ": " << errorInfo << "\033[0m\n";
+        cout << "\033[1;31m[" << std::hex << this->errorCode << std::dec << "] " << info << ": " << errorInfo << "\033[0m\n";
     }
 }
 
@@ -74,10 +74,7 @@ void epos::MotorController::printMovementProfile(unsigned int nodeId) {
 
 /**/
 void epos::MotorController::connect(string deviceName, string protocolName, string interfaceName, string portName, unsigned int baudrate) {
-
-    unsigned int errorCode, lBaudrate, lTimeout, nodeId;
-
-    nodeId = 1;
+    this->baudrate = baudrate;
 
     char* c_deviceName = new char[255];
     strcpy(c_deviceName, deviceName.c_str());
@@ -104,13 +101,17 @@ void epos::MotorController::connect(string deviceName, string protocolName, stri
     }
 
     LogInfo("Successful connected");
+}
+
+void epos::MotorController::checkMotorState(unsigned int nodeId) {
+    unsigned int errorCode, lBaudrate, lTimeout;
 
     if(VCS_GetProtocolStackSettings(this->deviceHandle, &lBaudrate, &lTimeout, &(this->errorCode)) == 0) {
         LogError("VCS_GetProtocolStackSettings", this->errorCode);
         exit(1);
     }
 
-    if(VCS_SetProtocolStackSettings(this->deviceHandle, baudrate, lTimeout, &(this->errorCode)) == 0) {
+    if(VCS_SetProtocolStackSettings(this->deviceHandle, this->baudrate, lTimeout, &(this->errorCode)) == 0) {
         LogError("VCS_SetProtocolStackSettings", this->errorCode);
         exit(1);
     }
@@ -145,12 +146,18 @@ void epos::MotorController::connect(string deviceName, string protocolName, stri
 }
 
 void epos::MotorController::startMovement(unsigned int nodeId, unsigned int pos, unsigned int relAbs, unsigned int immWait) {
+    /**/
+    checkMotorState(nodeId);
+
     int isFault;
 
+
     /* Check if key exists in movement profile map */
-    if(this->movementProfiles.find(nodeId) != this->movementProfiles.end()) {
-        MovementProfile movementProfile = this->movementProfiles.at(nodeId);
-        VCS_SetPositionProfile(this->deviceHandle, nodeId, movementProfile.velocity, movementProfile.acceleration, movementProfile.deceleration, &(this->errorCode));
+    MovementProfile movementProfile = this->getMovementProfile(nodeId);
+    
+    if(VCS_SetPositionProfile(this->deviceHandle, nodeId, movementProfile.velocity, movementProfile.acceleration, movementProfile.deceleration, &(this->errorCode)) == 0) {
+        this->LogError("startMovement->VCS_SetPositionProfile", this->errorCode);
+        exit(1);
     }
 
     if(!VCS_MoveToPosition(this->deviceHandle, nodeId, pos, relAbs, immWait, &(this->errorCode))) {
