@@ -17,13 +17,60 @@ void epos::MotorController::LogInfo(string info) {
     cout << BOLDBLUE << info << RESET << endl;
 }
 
-epos::MotorController::MotorController() {
+void epos::MotorController::LogDebug(string debugInfo) {
+    cout << YELLOW << debugInfo << RESET << endl;
+}
 
+epos::MotorController::MotorController() {
 }
 
 epos::MotorController::~MotorController() {
-
 }
+
+/**/
+void epos::MotorController::setMovementProfile(unsigned int nodeId, MovementProfile movementProfile) {
+    this->movementProfiles.insert({nodeId, movementProfile});
+}
+
+/**/
+epos::MovementProfile epos::MotorController::getMovementProfile(unsigned int nodeId) {
+    if(this->movementProfiles.find(nodeId) == this->movementProfiles.end()) {
+        unsigned int velocity, acceleration, deceleration;
+
+        if(VCS_GetPositionProfile(this->deviceHandle, nodeId, &velocity, &acceleration, &deceleration, &(this->errorCode)) == 0) {
+            LogError("getMovementProfile", this->errorCode);
+        }
+
+        MovementProfile movementProfile;
+        movementProfile.velocity = velocity;        
+        movementProfile.acceleration = acceleration;
+        movementProfile.deceleration = deceleration;
+
+        this->movementProfiles.insert({nodeId, movementProfile});
+
+        return movementProfile;
+    }
+
+    return this->movementProfiles.at(nodeId);
+}
+
+void epos::MotorController::printMovementProfile(unsigned int nodeId) {
+
+    MovementProfile movementProfile = this->getMovementProfile(nodeId);
+    
+    string msg = "Movement Profile -> Node " + to_string(nodeId);
+    LogInfo(msg);
+
+    msg = "\tVelocity: " + to_string(movementProfile.velocity);
+    LogInfo(msg);
+
+    msg = "\tAcceleration: " + to_string(movementProfile.acceleration);
+    LogInfo(msg);
+
+    msg = "\tDeceleration: " + to_string(movementProfile.deceleration);
+    LogInfo(msg);
+}
+
 
 /**/
 void epos::MotorController::connect(string deviceName, string protocolName, string interfaceName, string portName, unsigned int baudrate) {
@@ -97,12 +144,27 @@ void epos::MotorController::connect(string deviceName, string protocolName, stri
     }
 }
 
-void epos::MotorController::move(unsigned int pos, unsigned int relAbs, unsigned int immWait) {
-    /* Params: port handle, node id, target pos, absolute mov (TRUE/FALSE), immediately move (TRUE/FALSE) */
-    if(!VCS_MoveToPosition(this->deviceHandle, 1, pos, relAbs, immWait, &(this->errorCode))) {
+void epos::MotorController::startMovement(unsigned int nodeId, unsigned int pos, unsigned int relAbs, unsigned int immWait) {
+    int isFault;
+
+    /* Check if key exists in movement profile map */
+    if(this->movementProfiles.find(nodeId) != this->movementProfiles.end()) {
+        MovementProfile movementProfile = this->movementProfiles.at(nodeId);
+        VCS_SetPositionProfile(this->deviceHandle, nodeId, movementProfile.velocity, movementProfile.acceleration, movementProfile.deceleration, &(this->errorCode));
+    }
+
+    if(!VCS_MoveToPosition(this->deviceHandle, nodeId, pos, relAbs, immWait, &(this->errorCode))) {
         string msg = "Error while moving to position " + to_string(pos);
         LogError(msg, -1);
         exit(1);
     }
+
     sleep(1);
+}
+
+void epos::MotorController::stopMovement(unsigned int nodeId) {
+    if(VCS_HaltPositionMovement(this->deviceHandle, nodeId, &(this->errorCode)) == 0) {
+        LogError("stopMovement", this->errorCode);
+        exit(1);
+    }
 }

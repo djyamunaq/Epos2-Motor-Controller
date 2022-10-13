@@ -5,6 +5,8 @@
 #include "MotorController.h"
 
 using std::string;
+using std::cout;
+using std::cin;
 
 int main(int argc, char** argv) {
     unsigned int errorCode;
@@ -19,14 +21,20 @@ int main(int argc, char** argv) {
 
     mc.connect(deviceName, protocolName, interfaceName, portName, baudrate);
 
+    unsigned int nodeId = 1;
     long pos = 0;
+    epos::MovementProfile movementProfile;
+    movementProfile.velocity = 1000; 
+    movementProfile.acceleration = 100;
+    movementProfile.deceleration = 100;
 
     while(1) {
         cout << "Next Target Position: ";
         cin >> pos;
 
-        /* Move to position relative/absolute (0/1) position pos wait last move end/immediately (0/1) */
-        mc.move(pos, 0, 0);
+        // mc.move(pos, &movementProfile, ABSOLUTE, IMMEDIATE);
+        mc.startMovement(nodeId, pos, ABSOLUTE, IMMEDIATE);
+        // mc.printMovementProfile(nodeId);
     }
 
     return 0;
