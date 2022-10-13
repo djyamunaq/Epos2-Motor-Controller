@@ -3,7 +3,7 @@ import time
 from ctypes import *
 
 # EPOS Command Library path
-path = '/home/osboxes/Documents/EPOS_Linux_Library/lib/intel/x86_64/libEposCmd.so.6.8.1.0'
+path = './epos-lib/libEposCmd.so.6.8.1.0'
 
 # Load library
 cdll.LoadLibrary(path)
