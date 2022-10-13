@@ -25,12 +25,10 @@ epos::MotorController::MotorController() {
 epos::MotorController::~MotorController() {
 }
 
-/**/
 void epos::MotorController::setMovementProfile(unsigned int nodeId, MovementProfile movementProfile) {
     this->movementProfiles.insert({nodeId, movementProfile});
 }
 
-/**/
 epos::MovementProfile epos::MotorController::getMovementProfile(unsigned int nodeId) {
     if(this->movementProfiles.find(nodeId) == this->movementProfiles.end()) {
         unsigned int velocity, acceleration, deceleration;
@@ -69,8 +67,6 @@ void epos::MotorController::printMovementProfile(unsigned int nodeId) {
     LogInfo(msg);
 }
 
-
-/**/
 void epos::MotorController::connect(string deviceName, string protocolName, string interfaceName, string portName, unsigned int baudrate) {
     this->baudrate = baudrate;
 
