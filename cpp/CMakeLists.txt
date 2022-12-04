@@ -7,7 +7,9 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 add_executable(epos_example ${CMAKE_SOURCE_DIR}/epos_example.cpp)
 target_link_libraries(epos_example PUBLIC MotorController-lib)
+target_link_libraries(epos_example PUBLIC TrajectoryGenerator-lib)
 
 include(${CMAKE_SOURCE_DIR}/MotorController/CMakeLists.txt)
+include(${CMAKE_SOURCE_DIR}/TrajectoryGenerator/CMakeLists.txt)
 
 

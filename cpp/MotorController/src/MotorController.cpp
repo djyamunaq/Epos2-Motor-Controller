@@ -139,6 +139,32 @@ void epos::MotorController::checkMotorState(unsigned int nodeId) {
     }
 }
 
+void epos::MotorController::activatePositionMode(unsigned int nodeId) {
+    if(VCS_ActivatePositionMode(this->deviceHandle, nodeId, &(this->errorCode)) == 0) {
+        this->LogError("startMovement->VCS_SetPositionProfile", this->errorCode);
+        exit(1);
+    }
+}
+
+long epos::MotorController::getPos(unsigned int nodeId) {
+    long pos;
+    if(VCS_GetPositionMust(this->deviceHandle, nodeId, &pos, &(this->errorCode)) == 0) {
+        this->LogError("startMovement->VCS_SetPositionProfile", this->errorCode);
+        exit(1);
+    }
+
+    return pos;
+}
+
+void epos::MotorController::setPos(unsigned int nodeId, long pos) {
+    checkMotorState(nodeId);
+
+    if(VCS_SetPositionMust(this->deviceHandle, nodeId, pos, &(this->errorCode)) == 0) {
+        this->LogError("startMovement->VCS_SetPositionProfile", this->errorCode);
+        exit(1);
+    }
+}
+
 void epos::MotorController::startMovement(unsigned int nodeId, unsigned int pos, unsigned int relAbs, unsigned int immWait) {
     /**/
     checkMotorState(nodeId);

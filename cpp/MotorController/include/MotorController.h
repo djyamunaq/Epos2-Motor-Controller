@@ -59,7 +59,9 @@ namespace epos {
             /* Connect to Epos2 Card */
             void connect(string deviceName, string protocolName, string interfaceName, string portName, unsigned int baudrate);
             void checkMotorState(unsigned int nodeId);
-            /* Move to relative/absolute position pos wait/immediately */
+            void activatePositionMode(unsigned int nodeId);
+            long getPos(unsigned int nodeId);
+            void setPos(unsigned int nodeId, long pos);
             void startMovement(unsigned int nodeId, unsigned int pos, unsigned int relAbs, unsigned int immWait);
             void stopMovement(unsigned int nodeId);
             void setMovementProfile(unsigned int nodeId, MovementProfile movementProfile);

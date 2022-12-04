@@ -1,3 +1,6 @@
+import matplotlib.pyplot as plt
+import time
+import numpy as np
 from MotorController import *
 
 def main():
@@ -5,11 +8,13 @@ def main():
 
     motorController.connect("EPOS2", "MAXON SERIAL V2", "USB", "USB0", 1000000)
 
-    while True:
-        pos = input('Next Target Position: ')
-        pos = int(pos)
+    # nodeId = 1
 
-        motorController.startMovement(1, pos, 0, 0)
+    # motorController.activatePositionMode(nodeId)
+    # motorController.setPos(nodeId, 10)
+
+    # print('Pos:', pos)
+
 
 if __name__ == "__main__":
     main()

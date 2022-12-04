@@ -1,4 +1,3 @@
-import serial
 import time
 from ctypes import *
 
@@ -79,7 +78,7 @@ class MotorController:
             self.LogError('VCS_GetFaultState', self.errorCode)
 
         if isFault:
-            info = 'clear fault, node = ' + nodeId
+            info = 'clear fault, node = ' + str(nodeId)
             self.LogInfo(info)
 
             if epos.VCS_ClearFault(self.deviceHandle, nodeId, byref(self.errorCode)) == 0 :
@@ -114,27 +113,32 @@ class MotorController:
 
         self.LogInfo("Successfully connected")
 
-    def startMovement(self, nodeId, pos, relAbs, immWait):
+    def activatePositionMode(self, nodeId):
+        if epos.VCS_ActivatePositionMode(self.deviceHandle, nodeId, byref(self.errorCode)) == 0:
+            self.LogInfo("Activate Position Mode", self.errorCode)
+
+    def setPos(self, nodeId, pos):
         self.checkMotorState(nodeId)
 
         c_nodeId = c_int(nodeId)
-        c_pos = c_int(pos)
-        c_relAbs = c_int(relAbs)
-        c_immWait = c_int(immWait)
+        # c_pos = c_int(pos)
+        c_pos = c_float(pos)
 
-        movementProfile = self.getMovementProfile(nodeId)
+        epos.VCS_SetPositionMust(self.deviceHandle, c_nodeId, c_pos, byref(self.errorCode))
 
-        if epos.VCS_SetPositionProfile(self.deviceHandle, nodeId, movementProfile['velocity'], movementProfile['acceleration'], movementProfile['deceleration'], byref(self.errorCode)) == 0:
-            self.LogError('startMovement->VCS_SetPositionProfile', self.errorCode)
-            exit(1)
+    def getPos(self, nodeId):
+        self.checkMotorState(nodeId)
 
-        if epos.VCS_MoveToPosition(self.deviceHandle, c_nodeId, c_pos, c_relAbs, c_immWait, byref(self.errorCode)) == 0:
-            msg = 'Error while moving to position ' + str(pos)
-            self.LogError(msg, None)
-            exit(1)
+        c_nodeId = c_int(nodeId)
+        # c_pos = c_int(pos)
+        pos = 0
+        c_pos = c_float(pos)
+
+        if epos.VCS_GetPositionMust(self.deviceHandle, c_nodeId, byref(c_pos), byref(self.errorCode)) != 0:
+            return c_pos.value
+
+        self.LogError("", self.errorCode)
         
-        time.sleep(1)
-
     def stopMovement(self, nodeId):
         if epos.VCS_HaltPositionMovement(self.deviceHandle, nodeId, byref(self.errorCode)) == 0:
             self.LogError("stopMovement", self.errorCode)
